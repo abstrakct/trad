@@ -1,0 +1,183 @@
+#!/usr/bin/python
+#
+# trad - or perhaps tradctl? - is a python script for easy interaction with IKEA Trådfri lightbulbs
+# that are connected to an IKEA gateway.
+
+from pytradfri import Gateway
+from pytradfri.api.libcoap_api import APIFactory
+from pytradfri.error import PytradfriError
+from pytradfri.util import load_json, save_json
+
+import uuid
+import argparse
+import threading
+import time
+
+CONFIG_FILE = 'tradfri_standalone_psk.conf'
+
+class LightController:
+    """ A class which interfaces with the pytradfri library to control IKEA Trådfri lightbulbs """
+    # variables here?
+
+    def __init__(self):
+        self.conf = load_json(CONFIG_FILE)
+
+        try:
+            self.host = next(iter(self.conf.keys()))
+            self.identity = self.conf[self.host].get('identity')
+            self.psk = self.conf[self.host].get('key')
+            self.api_factory = APIFactory(host=self.host, psk_id=self.identity, psk=self.psk)
+        except KeyError:
+            self.identity = uuid.uuid4().hex
+            self.api_factory = APIFactory(host=self.host, psk_id=self.identity)
+
+        self.api = self.api_factory.request
+
+        self.gateway = Gateway()
+
+        self.devices_command = self.gateway.get_devices()
+        self.devices_commands = self.api(self.devices_command)
+        self.devices = self.api(self.devices_commands)
+
+        self.lights = [dev for dev in self.devices if dev.has_light_control]
+
+    def dim_light(self, name, value):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                print("Dimming", name, "to value", value)
+                dim_command = light.light_control.set_dimmer(value)
+                self.api(dim_command)
+
+    def turn_off_light(self, name):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                print("Turning off", name)
+                command = light.light_control.set_state(0)
+                self.api(command)
+
+    def turn_on_light(self, name):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                print("Turning on", name)
+                command = light.light_control.set_state(1)
+                self.api(command)
+
+def setup_conf_file(args):
+        if len(args.key) != 16:
+            raise PytradfriError("Invalid security code provided.")
+        else:
+            conf = load_json(CONFIG_FILE)
+    
+            try:
+                identity = conf[args.host].get('identity')
+                psk = conf[args.host].get('key')
+                api_factory = APIFactory(host=args.host, psk_id=identity, psk=psk)
+            except KeyError:
+                identity = uuid.uuid4().hex
+                api_factory = APIFactory(host=args.host, psk_id=identity)
+    
+                try:
+                    psk = api_factory.generate_psk(args.key)
+                    print('Generated PSK: ', psk)
+    
+                    conf[args.host] = {'identity': identity,
+                                       'key': psk}
+                    save_json(CONFIG_FILE, conf)
+                except AttributeError:
+                    raise PytradfriError("Please provide the 'Security Code' on the "
+                                         "back of your Tradfri gateway using the "
+                                         "-K flag.")
+
+def do_some_testing():
+    ctrl = LightController()
+    ctrl.dim_light("Kontor 2", 90)
+    ctrl.turn_on_light("Kontor")
+    ctrl.turn_on_light("Kontor 3")
+
+# Main start
+#oldparser = argparse.ArgumentParser()
+#oldparser.add_argument('host', metavar='IP', type=str,
+#                    help='IP Address of your Tradfri gateway')
+#oldparser.add_argument('-K', '--key', dest='key', required=False,
+#                    help='Security code found on your Tradfri gateway')
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(dest = 'command', help = 'Which action to perform')
+
+parser_setup = subparsers.add_parser('setup', help = 'Setup the configuration for your gateway')
+parser_setup.add_argument('host', metavar = 'IP', type=str, help = 'IP address of your Trådfri gateway')
+parser_setup.add_argument('key', help = 'Security code found on your Trådfri gateway')
+
+parser_on = subparsers.add_parser('on', help = 'Turn on a light')
+parser_on.add_argument('name', help = 'Name of light to turn on')
+
+parser_off = subparsers.add_parser('off', help = 'Turn off a light')
+parser_off.add_argument('name', help = 'Name of light to turn off')
+
+parser_dim = subparsers.add_parser('dim', help = 'Dim a light')
+parser_dim.add_argument('name', help = 'Name of light to dim')
+parser_dim.add_argument('value', help = 'Value to dim to', type = int)
+
+# TODO
+# Add 'check' command
+# Add command to list groups/lights/etc on network
+# Add 'color' command (warm, cold, etc)
+# Add interaction with groups of lights
+# Tasks
+
+args = parser.parse_args()
+
+ctrl = LightController()
+
+if args.command == 'setup':
+    setup_conf_file(args)
+
+if args.command == 'on':
+    ctrl.turn_on_light(args.name)
+
+if args.command == 'off':
+    ctrl.turn_off_light(args.name)
+
+if args.command == 'dim':
+    ctrl.dim_light(args.name, args.value)
+
+
+
+
+
+
+
+
+
+
+
+#    api = api_factory.request
+#
+#    gateway = Gateway()
+#
+#    devices_command = gateway.get_devices()
+#    devices_commands = api(devices_command)
+#    devices = api(devices_commands)
+#
+#    lights = [dev for dev in devices if dev.has_light_control]
+#
+#    # Print all lights
+#    print(lights)
+#
+#    for light in lights:
+#        print(light.name)
+#
+#    groupNameList = ['Stue', 'Kontor']
+#    groups = {}
+#    for groupName in groupNameList:
+#        groups[groupName] = []
+#        for light in lights:
+#            if groupName.lower() in light.name.lower():
+#                groups[groupName].append(light)
+#
+#    print(groups)
+#
+#    for light in groups['Kontor']:
+#        dim_command = light.light_control.set_state(5)
+#        api(dim_command)
+
