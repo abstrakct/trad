@@ -1,6 +1,5 @@
 # trad
 
-## What?
 trad is a simple, and currently unfinished, python program to facilitate easy interaction with IKEA Trådfri devices.
 
 ## Requirements
@@ -23,7 +22,7 @@ One use case I really like: I have a Raspberry Pi running Kodi media center, and
 
 Now the program should be working and able to communicate with your gateway. Try it with `trad devices` and see if it lists the devices on your network.
 
-## Examples / how to actually use the program
+## Examples aka How to actually use the program
 
 Note: all device names are case insensitive! 
 
@@ -47,3 +46,4 @@ Note: if a device name contains spaces (e.g. "Office 2") you must surround it wi
 - Add support for tasks/timers and moods.
 - Add support for setting color temperature.
 - Add support for RGB bulbs.
+- Many of these are already supported by pytradfri - those should be relatively easy to implement.
