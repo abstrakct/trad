@@ -23,7 +23,7 @@ import time
 import sys
 import os
 
-CONFIG_FILE = '/home/rolf/.tradfri_standalone_psk.conf'
+CONFIG_FILE = os.path.expanduser('.config/trad/trad_psk.conf')
 NAMEPROP = '9001'
 
 def jsonify(input):
@@ -33,8 +33,7 @@ def jsonify(input):
     
 
 class LightController:
-    """ A class which interfaces with the pytradfri library to control IKEA Trådfri lightbulbs """
-    # variables here?
+    """ A class which interfaces with the pytradfri library api to control IKEA Trådfri lightbulbs """
 
     def __init__(self):
         self.conf = load_json(CONFIG_FILE)
