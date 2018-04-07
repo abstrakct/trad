@@ -23,7 +23,7 @@ import time
 import sys
 import os
 
-CONFIG_FILE = os.path.expanduser('.config/trad/trad_psk.conf')
+CONFIG_FILE = os.path.expanduser('~/.config/trad/trad_psk.conf')
 NAMEPROP = '9001'
 
 def jsonify(input):
