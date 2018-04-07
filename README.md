@@ -1,6 +1,6 @@
 # trad
 
-trad is a simple, and currently unfinished, python program to facilitate easy interaction with IKEA Trådfri devices.
+trad is a simple, and currently unfinished, command line python program to facilitate easy interaction with IKEA Trådfri devices. Currently it can do simple tasks like turn on / turn off or dim lightbulbs. See example commands below.
 
 ## Requirements
 - pytradfri library (tested on version 5.4.2) - install it via pip or wherever you install your python packages from. Source code and more information at https://github.com/ggravlingen/pytradfri
@@ -19,8 +19,9 @@ One use case I really like: I have a Raspberry Pi running Kodi media center, and
 - On Linux/unix: create a directory named `trad` under `$HOME/.config`
 - On Windows: create a directory named `trad` in your user directory, probably `C:\Users\{your username}` 
 - Run `trad setup {ip} {key}` replacing {ip} with the ip address to your IKEA Trådfri gateway, and {key} with the security code found on your gateway. This security code will be encrypted and stored in a .json file in the directory you created above.
+- Example: `trad setup 192.168.0.100 dj2o3njmdcvoj23r`
 
-Now the program should be working and able to communicate with your gateway. Try it with `trad devices` and see if it lists the devices on your network.
+Now the program should be working, and be able to communicate with your gateway. Try it with `trad devices` and see if it lists the devices on your network.
 
 ## Examples aka How to actually use the program
 
