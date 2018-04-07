@@ -118,7 +118,6 @@ class LightController:
                 print(jsonify(dev.raw))
             
         else:
-            print("\nDevices paired to the gateway:\n")
             container = []
             for dev in self.devices:
                 container.append(dev.raw)
