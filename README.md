@@ -17,7 +17,7 @@ One use case I really like: I have a Raspberry Pi running Kodi media center, and
 ## How?
 - Install pytradfri, and then clone this repository.
 - Copy the `trad` file to a directory in your PATH (if you want access to it from anywhere).
-- On Linux/unix: create a directory named `trad` under `.config`
+- On Linux/unix: create a directory named `trad` under `$HOME/.config`
 - On Windows: create a directory named `trad` in your user directory, probably `C:\Users\{your username}` 
 - Run `trad setup {ip} {key}` replacing {ip} with the ip address to your IKEA Trådfri gateway, and {key} with the security code found on your gateway. This security code will be encrypted and stored in a .json file in the directory you created above.
 
