@@ -30,17 +30,17 @@ _Note: all device names are case insensitive!_
 _Note: if a device name contains spaces (e.g. "Office 2") you must surround it with quotation marks on the command line, e.g. `trad on "office 2"`. Single quotation marks also works._
 
 
-`trad on {name}` will turn on lightbulb named {name}. 
+* `trad on {name}` will turn on lightbulb named {name}. 
 
-`trad off {name}` will turn off lightbulb named {name}. 
-
-`trad toggle {name}` will turn toggle lightbulb named {name} on or off, depending on its current state.
-
-`trad dim {name} {value}` will set brightness value of lightbulb named {name} to {value}. Value must be between 0-254.
-
-`trad groups` will list the names of all groups defined in your gateway. Add `-j` to output json with all known details.
-
-`trad devices` will list the names of all devices defined in your gateway. Add `-j` to output json with all known details.
+* `trad off {name}` will turn off lightbulb named {name}. 
+ 
+* `trad toggle {name}` will turn toggle lightbulb named {name} on or off, depending on its current state.
+ 
+* `trad dim {name} {value}` will set brightness value of lightbulb named {name} to {value}. Value must be between 0-254.
+ 
+* `trad groups` will list the names of all groups defined in your gateway. Add `-j` to output json with all known details.
+ 
+* `trad devices` will list the names of all devices defined in your gateway. Add `-j` to output json with all known details.
 
 ## TODO aka Planned Features aka Wanted Features
 - Add interaction with entire groups (e.g. something like `trad off livingroom -g` to turn off all bulbs in the 'livingroom' group.)
