@@ -27,6 +27,8 @@ Now the program should be working and able to communicate with your gateway. Try
 
 Note: all device names are case insensitive! 
 
+Note: if a device name contains spaces (e.g. "Office 2") you must surround it with quotation marks on the command line, e.g. `trad on "office 2"`.
+
 `trad on {name}` will turn on lightbulb named {name}. 
 
 `trad off {name}` will turn off lightbulb named {name}. 
