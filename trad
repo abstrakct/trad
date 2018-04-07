@@ -6,9 +6,6 @@
 # many bits of code taken from the pytradfri library examples at 
 # https://github.com/ggravlingen/pytradfri/tree/master/examples
 #
-# TODO:
-# Parse all devices and groups and store them in a nice data structure so that we can
-# easily interact with all devices in a group etc.
 
 from pytradfri import Gateway
 from pytradfri.api.libcoap_api import APIFactory
@@ -201,7 +198,13 @@ parser_devices.add_argument('-j', help = 'Print info about all devices in json f
 # Add 'color' command (warm, cold, etc)
 # Add interaction with groups of lights
 # Tasks
-# Toggle light on/off
+# DONE: Toggle light on/off
+# TODO:
+# Parse all devices and groups and store them in a nice data structure so that we can
+# easily interact with all devices in a group etc.
+# TODO: consider writing a daemon that runs in the background and keeps tab of the current status of your Trådfri devices.
+#       This could simplify getting/setting values.
+# TODO: consider name change to tradctl ?!
 
 args = parser.parse_args()
 
@@ -230,41 +233,4 @@ if args.command == 'devices':
 
 if args.command == 'toggle':
     ctrl.toggle_light(args.name);
-
-
-
-
-
-
-
-
-#    api = api_factory.request
-#
-#    gateway = Gateway()
-#
-#    devices_command = gateway.get_devices()
-#    devices_commands = api(devices_command)
-#    devices = api(devices_commands)
-#
-#    lights = [dev for dev in devices if dev.has_light_control]
-#
-#    # Print all lights
-#    print(lights)
-#
-#    for light in lights:
-#        print(light.name)
-#
-#    groupNameList = ['Stue', 'Kontor']
-#    groups = {}
-#    for groupName in groupNameList:
-#        groups[groupName] = []
-#        for light in lights:
-#            if groupName.lower() in light.name.lower():
-#                groups[groupName].append(light)
-#
-#    print(groups)
-#
-#    for light in groups['Kontor']:
-#        dim_command = light.light_control.set_state(5)
-#        api(dim_command)
 
