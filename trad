@@ -1,19 +1,36 @@
 #!/usr/bin/python
 #
 # trad - or perhaps tradctl? - is a python script for easy interaction with IKEA Trådfri lightbulbs
-# that are connected to an IKEA gateway.
+# that are connected to an IKEA gateway. It uses the pytradfri library from https://github.com/ggravlingen/pytradfri/
+#
+# many bits of code taken from the pytradfri library examples at 
+# https://github.com/ggravlingen/pytradfri/tree/master/examples
+#
+# TODO:
+# Parse all devices and groups and store them in a nice data structure so that we can
+# easily interact with all devices in a group etc.
 
 from pytradfri import Gateway
 from pytradfri.api.libcoap_api import APIFactory
 from pytradfri.error import PytradfriError
 from pytradfri.util import load_json, save_json
+import json
 
 import uuid
 import argparse
 import threading
 import time
+import sys
+import os
 
-CONFIG_FILE = 'tradfri_standalone_psk.conf'
+CONFIG_FILE = '/home/rolf/.tradfri_standalone_psk.conf'
+NAMEPROP = '9001'
+
+def jsonify(input):
+    return json.dumps(input, sort_keys=True, indent=4)
+
+#class GroupDef:
+    
 
 class LightController:
     """ A class which interfaces with the pytradfri library to control IKEA Trådfri lightbulbs """
@@ -38,6 +55,16 @@ class LightController:
         self.devices_command = self.gateway.get_devices()
         self.devices_commands = self.api(self.devices_command)
         self.devices = self.api(self.devices_commands)
+        self.groups = self.api(self.gateway.get_groups())
+        tmp = []
+        self.group_names = []
+        for group in self.groups:
+            if self.api(group).raw not in tmp:
+                tmp.append(self.api(group).raw)
+
+        for x in tmp:
+            group_name = x[NAMEPROP]
+            self.group_names.append(group_name)
 
         self.lights = [dev for dev in self.devices if dev.has_light_control]
 
@@ -61,6 +88,49 @@ class LightController:
                 print("Turning on", name)
                 command = light.light_control.set_state(1)
                 self.api(command)
+
+    def toggle_light(self, name):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                if light.light_control.lights[0].state == True:
+                    command = light.light_control.set_state(0)
+                    self.api(command)
+                else:
+                    command = light.light_control.set_state(1)
+                    self.api(command)
+
+    def show_groups(self, printjson):
+        if len(self.group_names) == 0:
+            exit(bold("No groups defined!"))
+
+        if printjson:
+            for group in self.groups:
+                print(jsonify(self.api(group).raw))
+        else:
+            for n in self.group_names:
+                print(n)
+
+    def show_devices(self, printjson):
+        if len(self.devices) == 0:
+            exit(bold("No devices paired"))
+
+        if printjson:
+            for dev in self.devices:
+                print(jsonify(dev.raw))
+            
+        else:
+            print("\nDevices paired to the gateway:\n")
+            container = []
+            for dev in self.devices:
+                container.append(dev.raw)
+            
+            for x in container:
+                device_type = x['3']['1']
+                device_name = x[NAMEPROP]
+                print('{name} ({devtype})'.format(name = device_name, devtype = device_type))
+
+    def turn_on_group(self, name):
+        print('not implemented')
 
 def setup_conf_file(args):
         if len(args.key) != 16:
@@ -104,26 +174,36 @@ def do_some_testing():
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest = 'command', help = 'Which action to perform')
 
-parser_setup = subparsers.add_parser('setup', help = 'Setup the configuration for your gateway')
+parser_setup = subparsers.add_parser('setup', help = 'Setup IP address and security code of your gateway')
 parser_setup.add_argument('host', metavar = 'IP', type=str, help = 'IP address of your Trådfri gateway')
 parser_setup.add_argument('key', help = 'Security code found on your Trådfri gateway')
 
 parser_on = subparsers.add_parser('on', help = 'Turn on a light')
 parser_on.add_argument('name', help = 'Name of light to turn on')
+parser_on.add_argument('-g', help = 'Perform action on a group, not individual light.', action='store_true', default=False)
 
 parser_off = subparsers.add_parser('off', help = 'Turn off a light')
 parser_off.add_argument('name', help = 'Name of light to turn off')
+
+parser_off = subparsers.add_parser('toggle', help = 'Toggle a light on/off')
+parser_off.add_argument('name', help = 'Name of light to toggle')
 
 parser_dim = subparsers.add_parser('dim', help = 'Dim a light')
 parser_dim.add_argument('name', help = 'Name of light to dim')
 parser_dim.add_argument('value', help = 'Value to dim to', type = int)
 
+parser_groups  = subparsers.add_parser('groups',  help = 'Print information about all groups defined in the gateway')
+parser_groups.add_argument('-j', help = 'Print info about all groups in json format', action='store_true', default=False)
+parser_devices = subparsers.add_parser('devices', help = 'Print information about all devices defined in the gateway')
+parser_devices.add_argument('-j', help = 'Print info about all devices in json format', action='store_true', default=False)
+
 # TODO
-# Add 'check' command
-# Add command to list groups/lights/etc on network
+# Add check/get command
+# PARTIALLY DONE Add command to list groups/lights/etc on network
 # Add 'color' command (warm, cold, etc)
 # Add interaction with groups of lights
 # Tasks
+# Toggle light on/off
 
 args = parser.parse_args()
 
@@ -133,7 +213,10 @@ if args.command == 'setup':
     setup_conf_file(args)
 
 if args.command == 'on':
-    ctrl.turn_on_light(args.name)
+    if args.g:
+        ctrl.turn_on_group(args.name)
+    else:
+        ctrl.turn_on_light(args.name)
 
 if args.command == 'off':
     ctrl.turn_off_light(args.name)
@@ -141,8 +224,14 @@ if args.command == 'off':
 if args.command == 'dim':
     ctrl.dim_light(args.name, args.value)
 
+if args.command == 'groups':
+    ctrl.show_groups(args.j)
 
+if args.command == 'devices':
+    ctrl.show_devices(args.j)
 
+if args.command == 'toggle':
+    ctrl.toggle_light(args.name);
 
 
 
