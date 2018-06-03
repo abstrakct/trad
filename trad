@@ -124,6 +124,27 @@ class LightController:
                 device_name = x[NAMEPROP]
                 print('{name} ({devtype})'.format(name = device_name, devtype = device_type))
 
+    def show_lights(self, printjson, namesonly):
+        if len(self.devices) == 0:
+            exit(bold("No devices paired"))
+
+        if printjson:
+            for dev in self.lights:
+                print(jsonify(dev.raw))
+            
+        else:
+            container = []
+            for dev in self.lights:
+                container.append(dev.raw)
+            
+            for x in container:
+                device_type = x['3']['1']
+                device_name = x[NAMEPROP]
+                if namesonly:
+                    print('{name}'.format(name = device_name))
+                else:
+                    print('{name} ({devtype})'.format(name = device_name, devtype = device_type))
+
     def turn_on_group(self, name):
         print('not implemented')
 
@@ -180,8 +201,8 @@ parser_on.add_argument('-g', help = 'Perform action on a group, not individual l
 parser_off = subparsers.add_parser('off', help = 'Turn off a light')
 parser_off.add_argument('name', help = 'Name of light to turn off')
 
-parser_off = subparsers.add_parser('toggle', help = 'Toggle a light on/off')
-parser_off.add_argument('name', help = 'Name of light to toggle')
+parser_toggle = subparsers.add_parser('toggle', help = 'Toggle a light on/off')
+parser_toggle.add_argument('name', help = 'Name of light to toggle')
 
 parser_dim = subparsers.add_parser('dim', help = 'Dim a light')
 parser_dim.add_argument('name', help = 'Name of light to dim')
@@ -189,8 +210,14 @@ parser_dim.add_argument('value', help = 'Value to dim to', type = int)
 
 parser_groups  = subparsers.add_parser('groups',  help = 'Print information about all groups defined in the gateway')
 parser_groups.add_argument('-j', help = 'Print info about all groups in json format', action='store_true', default=False)
+
 parser_devices = subparsers.add_parser('devices', help = 'Print information about all devices defined in the gateway')
 parser_devices.add_argument('-j', help = 'Print info about all devices in json format', action='store_true', default=False)
+
+# TODO: -j and -n should be mutually exclusive?!
+parser_lights = subparsers.add_parser('lights', help = 'Print information about all lights connected to the gateway')
+parser_lights.add_argument('-j', help = 'Print info about all lights in json format', action='store_true', default=False)
+parser_lights.add_argument('-n', help = 'Print only the names of all connected lights', action='store_true', default=False)
 
 # TODO
 # Add check/get command
@@ -222,6 +249,9 @@ if args.command == 'on':
 if args.command == 'off':
     ctrl.turn_off_light(args.name)
 
+if args.command == 'toggle':
+    ctrl.toggle_light(args.name);
+
 if args.command == 'dim':
     ctrl.dim_light(args.name, args.value)
 
@@ -231,6 +261,5 @@ if args.command == 'groups':
 if args.command == 'devices':
     ctrl.show_devices(args.j)
 
-if args.command == 'toggle':
-    ctrl.toggle_light(args.name);
-
+if args.command == 'lights':
+    ctrl.show_lights(args.j, args.n)
