@@ -145,6 +145,14 @@ class LightController:
                 else:
                     print('{name} ({devtype})'.format(name = device_name, devtype = device_type))
 
+    def show_status(self, name):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                if light.light_control.lights[0].state == True:
+                    print('on')
+                else:
+                    print('off')
+
     def turn_on_group(self, name):
         print('not implemented')
 
@@ -219,6 +227,10 @@ parser_lights = subparsers.add_parser('lights', help = 'Print information about 
 parser_lights.add_argument('-j', help = 'Print info about all lights in json format', action='store_true', default=False)
 parser_lights.add_argument('-n', help = 'Print only the names of all connected lights', action='store_true', default=False)
 
+# TODO: add option to output 1/0 for on/off ?!
+parser_status = subparsers.add_parser('status', help = 'Print on/off status of a light')
+parser_status.add_argument('name', help = 'Name of light')
+
 # TODO
 # Add check/get command
 # PARTIALLY DONE Add command to list groups/lights/etc on network
@@ -250,7 +262,7 @@ if args.command == 'off':
     ctrl.turn_off_light(args.name)
 
 if args.command == 'toggle':
-    ctrl.toggle_light(args.name);
+    ctrl.toggle_light(args.name)
 
 if args.command == 'dim':
     ctrl.dim_light(args.name, args.value)
@@ -263,3 +275,6 @@ if args.command == 'devices':
 
 if args.command == 'lights':
     ctrl.show_lights(args.j, args.n)
+
+if args.command == 'status':
+    ctrl.show_status(args.name)
