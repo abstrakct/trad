@@ -7,18 +7,21 @@
 # https://github.com/ggravlingen/pytradfri/tree/master/examples
 #
 
-from pytradfri import Gateway
-from pytradfri.api.libcoap_api import APIFactory
-from pytradfri.error import PytradfriError
-from pytradfri.util import load_json, save_json
-import json
-
 import threading
 import argparse
+import signal
+import daemon
+import json
 import uuid
 import time
 import sys
 import os
+
+from pytradfri import Gateway
+from pytradfri.api.libcoap_api import APIFactory
+from pytradfri.error import PytradfriError
+from pytradfri.util import load_json, save_json
+from daemon import pidfile
 
 CONFIG_FILE = os.path.expanduser('~/.config/trad/trad_psk.conf')
 NAMEPROP = '9001'
@@ -94,6 +97,11 @@ class LightController:
                 else:
                     command = light.light_control.set_state(1)
                     self.api(command)
+
+    def set_color_temp(self, name, temp):
+        for light in self.lights:
+            if name.lower() == light.name.lower():
+                print("Setting color temp of", name, "to", temp)
 
     def show_groups(self, printjson):
         if len(self.group_names) == 0:
@@ -188,6 +196,13 @@ def do_some_testing():
     ctrl.turn_on_light("Kontor")
     ctrl.turn_on_light("Kontor 3")
 
+def shutdown(signum, frame):
+    sys.exit(0)
+
+def daemon_main():
+    while True:
+        print(" ")
+
 # Main start
 #oldparser = argparse.ArgumentParser()
 #oldparser.add_argument('host', metavar='IP', type=str,
@@ -212,7 +227,7 @@ parser_off.add_argument('name', help = 'Name of light to turn off')
 parser_toggle = subparsers.add_parser('toggle', help = 'Toggle a light on/off')
 parser_toggle.add_argument('name', help = 'Name of light to toggle')
 
-parser_dim = subparsers.add_parser('dim', help = 'Dim a light')
+parser_dim = subparsers.add_parser('dim', help = 'Dim (set brightness of) a light')
 parser_dim.add_argument('name', help = 'Name of light to dim')
 parser_dim.add_argument('value', help = 'Value to dim to', type = int)
 
@@ -230,6 +245,12 @@ parser_lights.add_argument('-n', help = 'Print only the names of all connected l
 # TODO: add option to output 1/0 for on/off ?!
 parser_status = subparsers.add_parser('status', help = 'Print on/off status of a light')
 parser_status.add_argument('name', help = 'Name of light')
+
+parser_temp = subparsers.add_parser('temp', help = 'Set color temperature of a light')
+parser_temp.add_argument('name', help = 'Name of light')
+parser_temp.add_argument('temp', help = 'Color temperature to set')
+
+parser_daemon = subparsers.add_parser('daemon', help = 'Start program as a daemon')
 
 # TODO
 # Add check/get command
@@ -278,3 +299,14 @@ if args.command == 'lights':
 
 if args.command == 'status':
     ctrl.show_status(args.name)
+
+if args.command == 'temp':
+    ctrl.set_color_temp(args.name, args.temp)
+
+if args.command == 'daemon':
+    pidf = '/tmp/deamontest.pid'
+    with daemon.DaemonContext(
+        working_directory='/tmp',
+        pidfile=pidfile.TimeoutPIDLockFile(pidf),
+        ) as context:
+        daemon_main()
