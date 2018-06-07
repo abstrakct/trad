@@ -102,6 +102,8 @@ class LightController:
         for light in self.lights:
             if name.lower() == light.name.lower():
                 print("Setting color temp of", name, "to", temp)
+                command = light.light_control.set_color_temp(temp)
+                self.api(command)
 
     def show_groups(self, printjson):
         if len(self.group_names) == 0:
@@ -248,7 +250,7 @@ parser_status.add_argument('name', help = 'Name of light')
 
 parser_temp = subparsers.add_parser('temp', help = 'Set color temperature of a light')
 parser_temp.add_argument('name', help = 'Name of light')
-parser_temp.add_argument('temp', help = 'Color temperature to set')
+parser_temp.add_argument('temp', help = 'Color temperature to set', type = int)
 
 parser_daemon = subparsers.add_parser('daemon', help = 'Start program as a daemon')
 
