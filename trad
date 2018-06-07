@@ -13,9 +13,9 @@ from pytradfri.error import PytradfriError
 from pytradfri.util import load_json, save_json
 import json
 
-import uuid
-import argparse
 import threading
+import argparse
+import uuid
 import time
 import sys
 import os
