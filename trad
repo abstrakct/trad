@@ -311,6 +311,12 @@ if args.command == 'temp':
         t = 250
     else:
         t = int(args.temp)
+        t += 250
+
+    if t >= 454:
+        print('value must be between 0-204')
+        sys.exit(1)
+
     ctrl.set_color_temp(args.name, t)
 
 if args.command == 'daemon':

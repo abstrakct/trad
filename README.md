@@ -42,6 +42,10 @@ _Note: if a device name contains spaces (e.g. "Office 2") you must surround it w
  
 * `trad devices` will list the names of all devices defined in your gateway. Add `-j` to output json with all known details.
 
+* `trad temp {name} {value}` will change the color temperature of a bulb. Value can be warm/normal/cool, or a number between 0-204.
+
+* `trad daemon` will daemonize the program - THE DAEMON CURRENTLY DOES NOTHING!!
+
 ## TODO aka Planned Features aka Wanted Features
 - Add interaction with entire groups (e.g. something like `trad off livingroom -g` to turn off all bulbs in the 'livingroom' group.)
 - Add command to get the current state of a lightbulb.
