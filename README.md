@@ -23,7 +23,7 @@ One use case I really like: I have a Raspberry Pi running Kodi media center, and
 
 Now the program should be working, and be able to communicate with your gateway. Try it with `trad devices` and see if it lists the devices on your network.
 
-## Examples aka How to actually use the program
+## Examples
 
 _Note: all device names are case insensitive!_
 
@@ -37,19 +37,20 @@ _Note: if a device name contains spaces (e.g. "Office 2") you must surround it w
 * `trad toggle {name}` will turn toggle lightbulb named {name} on or off, depending on its current state.
  
 * `trad dim {name} {value}` will set brightness value of lightbulb named {name} to {value}. Value must be between 0-254.
+
+* `trad temp {name} {value}` will change the color temperature of a bulb. Value can be warm/normal/cool, or a number between 0-204.
  
 * `trad groups` will list the names of all groups defined in your gateway. Add `-j` to output json with all known details.
  
 * `trad devices` will list the names of all devices defined in your gateway. Add `-j` to output json with all known details.
 
-* `trad temp {name} {value}` will change the color temperature of a bulb. Value can be warm/normal/cool, or a number between 0-204.
+* `trad daemon` will daemonize the program - DO NOT USE - THE DAEMON CURRENTLY DOES NOTHING!!
 
-* `trad daemon` will daemonize the program - THE DAEMON CURRENTLY DOES NOTHING!!
-
-## TODO aka Planned Features aka Wanted Features
+## TODO (aka Planned Features) (aka Wanted Features)
+- Migrate to a client/server model - or a daemon that can monitor the network and all trådfri device, and respond to commands.
 - Add interaction with entire groups (e.g. something like `trad off livingroom -g` to turn off all bulbs in the 'livingroom' group.)
-- Add command to get the current state of a lightbulb.
-- Add support for tasks/timers and moods.
-- Add support for setting color temperature.
+- [DONE for on/off state] Add command to get the current state of a lightbulb.
+- Add support for tasks/timers, and moods.
+- [DONE] Add support for setting color temperature.
 - Add support for RGB bulbs.
 - Many of these are already supported by pytradfri - those should be relatively easy to implement.
