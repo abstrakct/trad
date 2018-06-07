@@ -250,7 +250,7 @@ parser_status.add_argument('name', help = 'Name of light')
 
 parser_temp = subparsers.add_parser('temp', help = 'Set color temperature of a light')
 parser_temp.add_argument('name', help = 'Name of light')
-parser_temp.add_argument('temp', help = 'Color temperature to set', type = int)
+parser_temp.add_argument('temp', help = 'Color temperature to set')
 
 parser_daemon = subparsers.add_parser('daemon', help = 'Start program as a daemon')
 
@@ -303,7 +303,15 @@ if args.command == 'status':
     ctrl.show_status(args.name)
 
 if args.command == 'temp':
-    ctrl.set_color_temp(args.name, args.temp)
+    if args.temp == 'warm':
+        t = 454
+    elif args.temp == 'normal':
+        t = 352
+    elif args.temp == 'cool':
+        t = 250
+    else:
+        t = int(args.temp)
+    ctrl.set_color_temp(args.name, t)
 
 if args.command == 'daemon':
     pidf = '/tmp/deamontest.pid'
